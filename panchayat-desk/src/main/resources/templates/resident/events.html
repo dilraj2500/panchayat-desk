@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Events — Resident</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .modern-nav { display:flex; justify-content:space-between; align-items:center;
+      padding:14px 30px; background:#6366f1; color:white; }
+    .nav-brand { font-weight:700; font-size:18px; color:white; text-decoration:none; }
+    .nav-btn { border:none; padding:6px 14px; border-radius:6px; background:#ef4444; color:white; cursor:pointer; }
+    .event-card { background:white; border-radius:12px; padding:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.06); margin-bottom:16px; border-left:4px solid #6366f1; }
+    .badge-going { background:#d1fae5; color:#059669; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-not_going { background:#fee2e2; color:#b91c1c; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-maybe { background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-none { background:#f3f4f6; color:#374151; padding:4px 10px; border-radius:20px; font-size:12px; }
+  </style>
+</head>
+<body>
+<nav class="modern-nav">
+  <a href="/resident/dashboard" class="nav-brand">🏢 PanchayatDesk</a>
+  <div class="d-flex gap-3 align-items-center">
+    <span th:text="${user.name}" style="font-size:14px;"></span>
+    <form th:action="@{/logout}" method="post">
+      <button class="nav-btn">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div th:if="${param.rsvpd}" class="alert alert-success alert-dismissible fade show">
+    ✅ RSVP updated! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <h4 class="fw-bold mb-4">📅 Society Events</h4>
+
+  <div th:if="${events.empty}" class="text-muted">No upcoming events.</div>
+
+  <div th:each="event : ${events}" class="event-card">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h5 class="fw-bold mb-1" th:text="${event.title}"></h5>
+        <div class="text-muted small">
+          📅 <span th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy HH:mm')}"></span>
+        </div>
+        <div class="text-muted small" th:if="${event.venue}">
+          📍 <span th:text="${event.venue}"></span>
+        </div>
+        <p class="text-secondary small mt-1" th:text="${event.description}"></p>
+        <div class="mt-2">
+          Your RSVP:
+          <span th:class="'badge-' + ${rsvpMap[event.id].toLowerCase()}"
+                th:text="${rsvpMap[event.id] == 'NONE' ? 'Not responded' : rsvpMap[event.id]}"></span>
+        </div>
+      </div>
+      <div>
+        <form th:action="@{/resident/event/{id}/rsvp(id=${event.id})}" method="post"
+              class="d-flex gap-2 align-items-center">
+          <select name="status" class="form-select form-select-sm" style="width:130px;">
+            <option th:each="s : ${rsvpStatuses}" th:value="${s}" th:text="${s}"
+                    th:selected="${rsvpMap[event.id] == s.name()}"></option>
+          </select>
+          <button class="btn btn-sm btn-primary">RSVP</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <a href="/resident/dashboard" class="btn btn-outline-secondary mt-2">← Back to Dashboard</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

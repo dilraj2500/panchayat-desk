@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Flats — Secretary</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .modern-nav { display:flex; justify-content:space-between; align-items:center;
+      padding:14px 30px; background:#6366f1; color:white; }
+    .nav-brand { font-weight:700; font-size:18px; color:white; text-decoration:none; }
+    .nav-btn { border:none; padding:6px 14px; border-radius:6px; background:#ef4444; color:white; cursor:pointer; }
+    .card-modern { background:white; border-radius:12px; padding:25px; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    .badge-owner { background:#dbeafe; color:#1d4ed8; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-tenant { background:#fef9c3; color:#92400e; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-vacant { background:#f3f4f6; color:#374151; padding:4px 10px; border-radius:20px; font-size:12px; }
+  </style>
+</head>
+<body>
+<nav class="modern-nav">
+  <a href="/secretary/dashboard" class="nav-brand">🏢 PanchayatDesk</a>
+  <div class="d-flex gap-3 align-items-center">
+    <span th:text="${user.name}" style="font-size:14px;"></span>
+    <form th:action="@{/logout}" method="post">
+      <button class="nav-btn">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div th:if="${param.added}" class="alert alert-success alert-dismissible fade show">
+    ✅ Flat added! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${param.deleted}" class="alert alert-info alert-dismissible fade show">
+    🗑️ Flat deleted. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div class="row">
+    <!-- Add Flat -->
+    <div class="col-md-4 mb-4">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">🏠 Add New Flat</h5>
+        <form th:action="@{/secretary/flat/add}" method="post">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Flat Number</label>
+            <input type="text" name="flatNumber" class="form-control" placeholder="A-101" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Floor Number</label>
+            <input type="number" name="floorNumber" class="form-control" placeholder="1">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Type (BHK)</label>
+            <input type="text" name="flatType" class="form-control" placeholder="2BHK">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Occupancy</label>
+            <select name="occupancyType" class="form-select">
+              <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Owner (Resident)</label>
+            <select name="ownerId" class="form-select">
+              <option value="">-- Select Owner --</option>
+              <option th:each="r : ${residents}" th:value="${r.id}" th:text="${r.name}"></option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tenant (Optional)</label>
+            <select name="tenantId" class="form-select">
+              <option value="">-- Select Tenant --</option>
+              <option th:each="r : ${residents}" th:value="${r.id}" th:text="${r.name}"></option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add Flat</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Flats List -->
+    <div class="col-md-8">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">🏘️ All Flats (<span th:text="${flats.size()}"></span>)</h5>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Flat No.</th>
+                <th>Floor</th>
+                <th>Type</th>
+                <th>Occupancy</th>
+                <th>Owner</th>
+                <th>Tenant</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:if="${flats.empty}">
+                <td colspan="7" class="text-center text-muted">No flats added yet.</td>
+              </tr>
+              <tr th:each="flat : ${flats}">
+                <td class="fw-semibold" th:text="${flat.flatNumber}"></td>
+                <td th:text="${flat.floorNumber ?: '-'}"></td>
+                <td th:text="${flat.flatType ?: '-'}"></td>
+                <td>
+                  <span th:class="'badge-' + ${flat.occupancyType.name().toLowerCase().replace('_occupied','').replace('_','-')}"
+                        th:text="${flat.occupancyType}"></span>
+                </td>
+                <td th:text="${flat.owner != null ? flat.owner.name : '-'}"></td>
+                <td th:text="${flat.tenant != null ? flat.tenant.name : '-'}"></td>
+                <td>
+                  <form th:action="@{/secretary/flat/{id}/delete(id=${flat.id})}" method="post"
+                        onsubmit="return confirm('Delete flat?')">
+                    <button class="btn btn-sm btn-outline-danger">🗑️</button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

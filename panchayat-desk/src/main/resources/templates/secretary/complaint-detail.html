@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Complaint Detail — PanchayatDesk</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { margin:0; font-family:'Segoe UI', sans-serif; background:#f8fafc; }
+
+        .modern-nav {
+            display:flex; justify-content:space-between;
+            padding:14px 28px; background:#6366f1; color:white;
+        }
+        .nav-brand { color:white; text-decoration:none; font-weight:700; }
+        .nav-btn { padding:6px 12px; border:none; border-radius:6px; }
+        .nav-btn-danger { background:#ef4444; color:white; }
+
+        .app-layout { display:flex; }
+
+        .sidebar {
+            width:220px; background:white; padding:20px;
+            min-height:100vh;
+        }
+        .sidebar-link {
+            display:block; padding:10px; border-radius:8px;
+            text-decoration:none; color:#0f172a;
+        }
+        .sidebar-link.active { background:#eef2ff; }
+
+        .main-content { flex:1; padding:24px; }
+
+        .card-modern {
+            background:white; border-radius:16px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.05);
+            overflow:hidden;
+        }
+        .card-header-modern {
+            padding:16px 20px;
+            border-bottom:1px solid #e2e8f0;
+            display:flex; justify-content:space-between;
+        }
+        .card-body-modern { padding:20px; }
+
+        .badge-modern { padding:6px 12px; border-radius:6px; font-size:12px; }
+        .badge-pending { background:#fef3c7; color:#d97706; }
+        .badge-resolved { background:#d1fae5; color:#059669; }
+        .badge-inprogress { background:#dbeafe; color:#2563eb; }
+        .badge-rejected { background:#fee2e2; color:#b91c1c; }
+
+        .btn-modern { padding:10px; border-radius:8px; border:none; }
+        .btn-primary-modern { background:#6366f1; color:white; }
+        .btn-success-modern { background:#059669; color:white; }
+        .btn-outline-modern { border:1px solid #cbd5f5; }
+
+        .form-control-modern {
+            width:100%; padding:10px;
+            border:1px solid #cbd5f5;
+            border-radius:8px;
+        }
+
+        #chatBox { height:300px; overflow-y:auto; padding:16px; background:#f8fafc; }
+    </style>
+</head>
+
+<body>
+
+<nav class="modern-nav">
+    <a href="/secretary/dashboard" class="nav-brand">PanchayatDesk</a>
+    <div>
+        <span>🔑 <span th:text="${user.name}"></span></span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="nav-btn nav-btn-danger">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="/secretary/dashboard" class="sidebar-link">🏠 Dashboard</a>
+        <a href="/secretary/complaints" class="sidebar-link active">📋 Complaints</a>
+        <a href="/secretary/residents" class="sidebar-link">👥 Residents</a>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <h2>Complaint Detail</h2>
+
+        <div class="row g-4">
+
+            <!-- LEFT -->
+            <div class="col-md-7">
+
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <h5>Complaint Info</h5>
+                        <span th:class="${'badge-modern ' +
+                            (complaint.status.name() == 'PENDING' ? 'badge-pending' :
+                             complaint.status.name() == 'RESOLVED' ? 'badge-resolved' :
+                             complaint.status.name() == 'IN_PROGRESS' ? 'badge-inprogress' : 'badge-rejected')}"
+                              th:text="${complaint.status}">
+                        </span>
+                    </div>
+
+                    <div class="card-body-modern">
+
+                        <p><b>Title:</b> <span th:text="${complaint.title}"></span></p>
+                        <p><b>Category:</b> <span th:text="${complaint.category}"></span></p>
+                        <p><b>Priority:</b> <span th:text="${complaint.priority}"></span></p>
+                        <p><b>Resident:</b> <span th:text="${complaint.resident.name}"></span></p>
+                        <p><b>Flat:</b> <span th:text="${complaint.resident.flatNumber}"></span></p>
+                        <p><b>Description:</b> <span th:text="${complaint.description}"></span></p>
+
+                    </div>
+                </div>
+
+                <!-- CHAT -->
+                <div class="card-modern mt-4">
+                    <div class="card-header-modern">
+                        <h5>Chat</h5>
+                    </div>
+
+                    <div id="chatBox"></div>
+
+                    <div style="padding:16px; display:flex; gap:8px;">
+                        <input id="chatMsgInput" class="form-control-modern">
+                        <button onclick="sendChatMessage()" class="btn-modern btn-primary-modern">Send</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-md-5">
+
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <h5>Update</h5>
+                    </div>
+
+                    <div class="card-body-modern">
+
+                        <form th:action="@{/secretary/complaint/{id}/update(id=${complaint.id})}" method="post">
+
+                            <select name="status" class="form-control-modern mb-3">
+                                <option th:each="s:${statuses}" th:value="${s}" th:text="${s}"></option>
+                            </select>
+
+                            <textarea name="reply" id="replyBox" class="form-control-modern mb-3"
+                                      rows="4"></textarea>
+
+                            <button type="button" onclick="getAiSuggestion()"
+                                    class="btn-modern btn-primary-modern w-100 mb-2">
+                                🤖 AI Suggest
+                            </button>
+
+                            <button type="submit"
+                                    class="btn-modern btn-success-modern w-100">
+                                Update
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+    const complaintId = [[${complaint.id}]];
+
+    function appendMessage(msg) {
+        const box = document.getElementById('chatBox');
+        box.innerHTML += `<div>${msg}</div>`;
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatMsgInput');
+        const message = input.value;
+
+        await fetch('/chat/send/' + complaintId, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({message})
+        });
+
+        input.value = '';
+    }
+
+    async function getAiSuggestion() {
+        const res = await fetch('/chatbot/ask', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({message:'Generate reply'})
+        });
+        const data = await res.json();
+        document.getElementById('replyBox').value = data.reply;
+    }
+</script>
+
+</body>
+</html>
