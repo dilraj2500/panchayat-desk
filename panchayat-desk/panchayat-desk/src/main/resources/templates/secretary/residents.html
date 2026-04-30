@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Residents — PanchayatDesk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --bg-light: #f8fafc;
+            --bg-lighter: #f1f5f9;
+            --sidebar-width: 220px;
+            --nav-height: 60px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); }
+
+        /* NAVBAR */
+        .modern-nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-height); background: white; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 1000; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .nav-brand { font-size: 20px; font-weight: 800; color: var(--text-primary); text-decoration: none; }
+        .nav-brand span { color: var(--primary-color); }
+        .nav-actions { display: flex; align-items: center; gap: 16px; }
+        .nav-user { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        .nav-btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
+        .nav-btn-danger { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .nav-btn-danger:hover { background: #ef4444; color: white; }
+
+        /* LAYOUT */
+        .app-layout { display: flex; padding-top: var(--nav-height); min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-width); background: white; border-right: 1px solid var(--border-color); position: fixed; top: var(--nav-height); left: 0; bottom: 0; overflow-y: auto; padding: 20px 12px; z-index: 900; }
+        .sidebar-section { margin-bottom: 8px; }
+        .sidebar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px; padding: 0 12px; margin-bottom: 8px; }
+        .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; margin-bottom: 2px; }
+        .sidebar-link:hover { background: var(--bg-lighter); color: var(--text-primary); text-decoration: none; }
+        .sidebar-link.active { background: rgba(99,102,241,0.1); color: var(--primary-color); font-weight: 600; }
+        .sidebar-link .icon { font-size: 16px; }
+
+        /* MAIN */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 32px; }
+
+        /* PAGE HEADER */
+        .page-header { margin-bottom: 28px; }
+        .page-title { font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+        .page-subtitle { color: var(--text-secondary); font-size: 15px; }
+
+        /* CARD */
+        .card-modern { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px; }
+
+        /* TABLE */
+        .table-modern { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-modern thead tr { background: var(--bg-lighter); }
+        .table-modern th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .table-modern td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); vertical-align: middle; }
+        .table-modern tbody tr:hover { background: var(--bg-light); }
+        .table-modern tbody tr:last-child td { border-bottom: none; }
+
+        /* BADGES */
+        .badge-modern { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-resolved { background: #d1fae5; color: #059669; }
+        .badge-rejected { background: #fee2e2; color: #dc2626; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-secondary); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state-text { font-size: 16px; font-weight: 500; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<nav class="modern-nav">
+    <a href="/secretary/dashboard" class="nav-brand">Panchayat<span>Desk</span></a>
+    <div class="nav-actions">
+        <span class="nav-user">🔑 <span th:text="${user.name}"></span></span>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button class="nav-btn nav-btn-danger">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">Menu</div>
+            <a href="/secretary/dashboard" class="sidebar-link">
+                <span class="icon">🏠</span> Dashboard
+            </a>
+            <a href="/secretary/complaints" class="sidebar-link">
+                <span class="icon">📋</span> All Complaints
+            </a>
+            <a href="/secretary/residents" class="sidebar-link active">
+                <span class="icon">👥</span> Residents
+            </a>
+            <a href="/secretary/flats" class="sidebar-link">
+                <span class="icon">🏠</span> Flats
+            </a>
+            <a href="/secretary/notices" class="sidebar-link">
+                <span class="icon">📢</span> Notice Board
+            </a>
+            <a href="/secretary/maintenance" class="sidebar-link">
+                <span class="icon">💸</span> Maintenance
+            </a>
+            <a href="/secretary/events" class="sidebar-link">
+                <span class="icon">📅</span> Events
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Residents</h1>
+            <p class="page-subtitle">All registered residents in your society</p>
+        </div>
+
+        <div class="card-modern">
+            <div style="overflow-x:auto;">
+                <table class="table-modern">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Flat</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r, i : ${residents}">
+                        <td th:text="${i.index + 1}"></td>
+                        <td style="font-weight:600;" th:text="${r.name}"></td>
+                        <td th:text="${r.email}"></td>
+                        <td th:text="${r.phoneNumber}"></td>
+                        <td th:text="${r.flatNumber}"></td>
+                        <td>
+                            <span th:class="${r.isActive ? 'badge-modern badge-resolved' : 'badge-modern badge-rejected'}"
+                                  th:text="${r.isActive ? 'Active' : 'Inactive'}"></span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(residents)}">
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">👥</div>
+                                <div class="empty-state-text">No residents yet!</div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

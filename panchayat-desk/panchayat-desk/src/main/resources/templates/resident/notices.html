@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Notice Board — Resident</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .modern-nav { display:flex; justify-content:space-between; align-items:center;
+      padding:14px 30px; background:#6366f1; color:white; }
+    .nav-brand { font-weight:700; font-size:18px; color:white; text-decoration:none; }
+    .nav-btn { border:none; padding:6px 14px; border-radius:6px; background:#ef4444; color:white; cursor:pointer; }
+    .notice-card { background:white; border-radius:12px; padding:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.06); margin-bottom:16px; border-left:4px solid #6366f1; }
+    .badge-type { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+    .badge-general { background:#e0e7ff; color:#4338ca; }
+    .badge-water { background:#dbeafe; color:#1d4ed8; }
+    .badge-meeting { background:#fef9c3; color:#92400e; }
+    .badge-maintenance { background:#fee2e2; color:#b91c1c; }
+    .badge-electricity { background:#fef3c7; color:#d97706; }
+    .badge-security { background:#d1fae5; color:#065f46; }
+    .badge-other { background:#f3f4f6; color:#374151; }
+  </style>
+</head>
+<body>
+<nav class="modern-nav">
+  <a href="/resident/dashboard" class="nav-brand">🏢 PanchayatDesk</a>
+  <div class="d-flex gap-3 align-items-center">
+    <span th:text="${user.name}" style="font-size:14px;"></span>
+    <form th:action="@{/logout}" method="post">
+      <button class="nav-btn">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <h4 class="fw-bold mb-4">📢 Notice Board</h4>
+
+  <div th:if="${notices.empty}" class="text-muted">No active notices for your society.</div>
+
+  <div th:each="notice : ${notices}" class="notice-card">
+    <span th:class="'badge-type badge-' + ${notice.type.name().toLowerCase()}"
+          th:text="${notice.type}"></span>
+    <h5 class="fw-bold mt-2 mb-1" th:text="${notice.title}"></h5>
+    <p class="text-secondary mb-1" th:text="${notice.content}"></p>
+    <small class="text-muted">
+      Posted by <strong th:text="${notice.postedBy.name}"></strong> on
+      <span th:text="${#temporals.format(notice.createdAt, 'dd MMM yyyy')}"></span>
+    </small>
+  </div>
+
+  <a href="/resident/dashboard" class="btn btn-outline-secondary mt-2">← Back to Dashboard</a>
+</div>
+</body>
+</html>

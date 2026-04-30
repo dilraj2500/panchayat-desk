@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Notice Board — Secretary</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .modern-nav { display:flex; justify-content:space-between; align-items:center;
+      padding:14px 30px; background:#6366f1; color:white; }
+    .nav-brand { font-weight:700; font-size:18px; color:white; text-decoration:none; }
+    .nav-btn { border:none; padding:6px 14px; border-radius:6px; background:#ef4444; color:white; cursor:pointer; }
+    .card-modern { background:white; border-radius:12px; padding:25px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    .badge-type { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+    .badge-general { background:#e0e7ff; color:#4338ca; }
+    .badge-water { background:#dbeafe; color:#1d4ed8; }
+    .badge-meeting { background:#fef9c3; color:#92400e; }
+    .badge-maintenance { background:#fee2e2; color:#b91c1c; }
+    .badge-electricity { background:#fef3c7; color:#d97706; }
+    .badge-security { background:#d1fae5; color:#065f46; }
+    .badge-other { background:#f3f4f6; color:#374151; }
+  </style>
+</head>
+<body>
+<nav class="modern-nav">
+  <a href="/secretary/dashboard" class="nav-brand">🏢 PanchayatDesk</a>
+  <div class="d-flex gap-3 align-items-center">
+    <span th:text="${user.name}" style="font-size:14px;"></span>
+    <form th:action="@{/logout}" method="post">
+      <button class="nav-btn">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- Alert -->
+  <div th:if="${param.added}" class="alert alert-success alert-dismissible fade show">
+    ✅ Notice posted successfully! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${param.deleted}" class="alert alert-info alert-dismissible fade show">
+    🗑️ Notice deleted. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div class="row">
+    <!-- Add Notice Form -->
+    <div class="col-md-4 mb-4">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">📢 Post New Notice</h5>
+        <form th:action="@{/secretary/notice/add}" method="post">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Notice title" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Type</label>
+            <select name="type" class="form-select">
+              <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Content</label>
+            <textarea name="content" class="form-control" rows="4"
+                      placeholder="Write notice details..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Post Notice</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notice List -->
+    <div class="col-md-8">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">📋 All Notices</h5>
+        <div th:if="${notices.empty}" class="text-muted">No notices posted yet.</div>
+        <div th:each="notice : ${notices}" class="border rounded p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span th:class="'badge-type badge-' + ${notice.type.name().toLowerCase()}"
+                    th:text="${notice.type}"></span>
+              <h6 class="fw-bold mt-2 mb-1" th:text="${notice.title}"></h6>
+              <p class="text-muted small mb-1" th:text="${notice.content}"></p>
+              <small class="text-secondary"
+                     th:text="${#temporals.format(notice.createdAt, 'dd MMM yyyy HH:mm')}"></small>
+            </div>
+            <form th:action="@{/secretary/notice/{id}/delete(id=${notice.id})}" method="post"
+                  onsubmit="return confirm('Delete this notice?')">
+              <button class="btn btn-sm btn-outline-danger">🗑️</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

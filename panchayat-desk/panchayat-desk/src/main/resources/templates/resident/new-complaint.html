@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Complaint — PanchayatDesk</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8fafc;
+        }
+
+        /* NAVBAR */
+        .modern-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 30px;
+            background: #6366f1;
+            color: white;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-btn {
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: #ef4444;
+            color: white;
+        }
+
+        /* LAYOUT */
+        .app-layout {
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: white;
+            height: calc(100vh - 60px);
+            padding: 20px;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link.active,
+        .sidebar-link:hover {
+            background: #eef2ff;
+            color: #6366f1;
+        }
+
+        /* MAIN */
+        .main-content {
+            flex: 1;
+            padding: 25px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+        }
+
+        /* CARD */
+        .card-modern {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        /* FORM */
+        .form-control-modern {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .form-control-modern:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+        }
+
+        .form-label-modern {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .form-group-modern {
+            margin-bottom: 15px;
+        }
+
+        /* BUTTONS */
+        .btn-modern {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-primary-modern {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-outline-modern {
+            border: 1px solid #6366f1;
+            color: #6366f1;
+        }
+
+        /* CHATBOT */
+        .chatbot-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 14px;
+            font-size: 18px;
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            background: #f8fafc;
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chatbot-header {
+            background: #6366f1;
+            color: white;
+            padding: 10px;
+        }
+
+        .chatbot-messages {
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chatbot-input {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="modern-nav">
+    <a href="/resident/dashboard" class="nav-brand">PanchayatDesk</a>
+    <div>
+        👤 <span th:text="${user.name}"></span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="nav-btn">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <a href="/resident/dashboard" class="sidebar-link">🏠 Dashboard</a>
+        <a href="/resident/complaint/new" class="sidebar-link active">➕ New Complaint</a>
+        <a href="/resident/complaints" class="sidebar-link">📋 My Complaints</a>
+    </aside>
+
+    <main class="main-content">
+
+        <h1 class="page-title">Submit New Complaint</h1>
+        <p class="page-subtitle">Describe your issue and we'll get it resolved</p>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <div class="card-modern">
+
+                    <form th:action="@{/resident/complaint/submit}" method="post">
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Complaint Title</label>
+                            <input type="text" name="title" class="form-control-modern" required>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-modern">Category</label>
+                                <select name="category" class="form-control-modern" required>
+                                    <option value="">-- Select Category --</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-modern">Priority</label>
+                                <select name="priority" class="form-control-modern">
+                                    <option value="LOW">🟢 Low</option>
+                                    <option value="MEDIUM">🟡 Medium</option>
+                                    <option value="HIGH">🔴 High</option>
+                                    <option value="URGENT">🚨 Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">Description</label>
+                            <textarea name="description" rows="5" class="form-control-modern" required></textarea>
+                        </div>
+
+                        <div style="display:flex; gap:10px;">
+                            <a href="/resident/dashboard" class="btn-modern btn-outline-modern">← Back</a>
+                            <button type="submit" class="btn-modern btn-primary-modern">Submit →</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<button class="chatbot-btn" onclick="toggleChat()">💬</button>
+
+<div class="chatbot-window" id="chatWindow">
+    <div class="chatbot-header">🤖 AI Assistant</div>
+    <div class="chatbot-messages" id="chatMessages"></div>
+    <div class="chatbot-input">
+        <input type="text" id="chatInput" class="form-control">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+    }
+</script>
+
+</body>
+</html>

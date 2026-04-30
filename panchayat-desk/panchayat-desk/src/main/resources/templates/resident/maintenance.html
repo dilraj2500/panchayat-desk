@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Maintenance — Resident</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; }
+    .modern-nav { display:flex; justify-content:space-between; align-items:center;
+      padding:14px 30px; background:#6366f1; color:white; }
+    .nav-brand { font-weight:700; font-size:18px; color:white; text-decoration:none; }
+    .nav-btn { border:none; padding:6px 14px; border-radius:6px; background:#ef4444; color:white; cursor:pointer; }
+    .card-modern { background:white; border-radius:12px; padding:25px; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    .badge-paid { background:#d1fae5; color:#059669; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-unpaid { background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:20px; font-size:12px; }
+    .badge-overdue { background:#fee2e2; color:#b91c1c; padding:4px 10px; border-radius:20px; font-size:12px; }
+  </style>
+</head>
+<body>
+<nav class="modern-nav">
+  <a href="/resident/dashboard" class="nav-brand">🏢 PanchayatDesk</a>
+  <div class="d-flex gap-3 align-items-center">
+    <span th:text="${user.name}" style="font-size:14px;"></span>
+    <form th:action="@{/logout}" method="post">
+      <button class="nav-btn">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <div th:if="${param.paid}" class="alert alert-success alert-dismissible fade show">
+    ✅ Payment successful! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <h4 class="fw-bold mb-4">💰 My Maintenance Bills</h4>
+
+  <div class="row">
+    <!-- Bills -->
+    <div class="col-md-8 mb-4">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">📋 Bills</h5>
+        <div th:if="${bills.empty}" class="text-muted">No bills generated yet.</div>
+        <div th:each="bill : ${bills}" class="border rounded p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold" th:text="${bill.billMonth}"></div>
+              <div class="text-muted small">Due: <span th:text="${bill.dueDate}"></span></div>
+              <div class="fw-bold mt-1" style="color:#6366f1" th:text="'₹' + ${bill.amount}"></div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+              <span th:class="'badge-' + ${bill.status.name().toLowerCase()}"
+                    th:text="${bill.status}"></span>
+              <div th:if="${bill.status.name() == 'UNPAID'}">
+                <form th:action="@{/resident/maintenance/pay/{id}(id=${bill.id})}" method="post"
+                      class="d-flex gap-2">
+                  <select name="method" class="form-select form-select-sm">
+                    <option th:each="m : ${methods}" th:value="${m}" th:text="${m}"></option>
+                  </select>
+                  <button class="btn btn-sm btn-success">Pay Now</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="col-md-4">
+      <div class="card-modern">
+        <h5 class="fw-bold mb-3">🧾 Payment History</h5>
+        <div th:if="${payments.empty}" class="text-muted">No payments yet.</div>
+        <div th:each="p : ${payments}" class="border-bottom pb-2 mb-2">
+          <div class="fw-semibold" th:text="'₹' + ${p.amountPaid}"></div>
+          <div class="text-muted small" th:text="${p.bill.billMonth}"></div>
+          <div class="text-muted small" th:text="${p.paymentMethod}"></div>
+          <div class="text-secondary" style="font-size:11px;"
+               th:text="'TXN: ' + ${p.transactionId}"></div>
+          <div class="text-secondary" style="font-size:11px;"
+               th:text="${#temporals.format(p.paidAt, 'dd MMM yyyy HH:mm')}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="/resident/dashboard" class="btn btn-outline-secondary">← Back to Dashboard</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error — PanchayatDesk</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f1f5f9;">
+<div style="text-align:center; padding:48px;">
+    <div style="font-size:64px; margin-bottom:24px;">⚠️</div>
+    <h1 style="font-size:28px; font-weight:800; color:#0f172a; margin-bottom:12px;">Something went wrong!</h1>
+    <p style="font-size:16px; color:#64748b; margin-bottom:32px;" th:text="${error}">An error occurred.</p>
+    <a href="/" class="btn-modern btn-primary-modern" style="text-decoration:none; display:inline-flex;">Go Home</a>
+</div>
+</body>
+</html>

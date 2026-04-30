@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard — PanchayatDesk</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FONT AWESOME -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- 🔥 FULL CSS -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8fafc;
+        }
+
+        /* NAVBAR */
+        .modern-nav {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:14px 30px;
+            background:#6366f1;
+            color:white;
+        }
+        .nav-brand {
+            font-weight:700;
+            font-size:20px;
+            color:white;
+            text-decoration:none;
+        }
+        .nav-btn {
+            padding:6px 14px;
+            border-radius:6px;
+            border:none;
+            background:#6366f1;
+            color:white;
+        }
+        .nav-btn-outline {
+            background:transparent;
+            border:1px solid rgba(255,255,255,0.5);
+        }
+        .nav-btn-danger {
+            background:#ef4444;
+        }
+
+        /* PAGE */
+        .page-title {
+            font-size:26px;
+            font-weight:700;
+        }
+        .page-subtitle {
+            color:#64748b;
+        }
+
+        /* CARD */
+        .card-modern {
+            background:white;
+            border-radius:16px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.05);
+            overflow:hidden;
+        }
+
+        /* STAT */
+        .stat-card {
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            text-align:center;
+        }
+        .stat-value {
+            font-size:24px;
+            font-weight:800;
+        }
+
+        /* BUTTON */
+        .btn-modern {
+            padding:10px 16px;
+            border-radius:8px;
+            text-decoration:none;
+            border:none;
+        }
+        .btn-primary-modern {
+            background:#6366f1;
+            color:white;
+        }
+        .btn-success-modern {
+            background:#059669;
+            color:white;
+        }
+        .btn-outline-modern {
+            border:1px solid #6366f1;
+            color:#6366f1;
+        }
+
+        /* BADGE */
+        .badge-modern {
+            padding:5px 10px;
+            border-radius:6px;
+            font-size:12px;
+        }
+        .badge-pending { background:#fef3c7; color:#d97706; }
+        .badge-resolved { background:#d1fae5; color:#059669; }
+        .badge-inprogress { background:#dbeafe; color:#2563eb; }
+        .badge-rejected { background:#fee2e2; color:#b91c1c; }
+
+        /* MINI STAT */
+        .mini-stat {
+            background:#f1f5f9;
+            border-radius:10px;
+            padding:10px;
+            text-align:center;
+        }
+
+        /* SOCIETY HEADER */
+        .society-card-header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 20px;
+        }
+
+        /* COMPLAINT ITEM */
+        .complaint-item {
+            padding:10px 0;
+            border-bottom:1px solid #e2e8f0;
+        }
+        .complaint-title {
+            font-weight:600;
+        }
+        .complaint-meta {
+            font-size:12px;
+            color:#64748b;
+        }
+
+        /* ALERT */
+        .alert-modern {
+            padding:12px;
+            border-radius:8px;
+        }
+        .alert-success-modern {
+            background:#d1fae5;
+            color:#065f46;
+        }
+
+        /* CHATBOT */
+        .chatbot-btn {
+            position:fixed;
+            bottom:20px;
+            right:20px;
+            background:#6366f1;
+            color:white;
+            border:none;
+            border-radius:50%;
+            padding:14px;
+        }
+
+        .chatbot-window {
+            position:fixed;
+            bottom:80px;
+            right:20px;
+            width:300px;
+            background:#f8fafc;
+            border-radius:12px;
+            display:none;
+            flex-direction:column;
+            box-shadow:0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chatbot-header {
+            background:#6366f1;
+            color:white;
+            padding:10px;
+        }
+
+        .chatbot-messages {
+            height:200px;
+            overflow-y:auto;
+            padding:10px;
+        }
+
+        .chatbot-input {
+            display:flex;
+            gap:5px;
+            padding:10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="modern-nav">
+    <a href="/admin/dashboard" class="nav-brand">PanchayatDesk</a>
+    <div class="nav-actions">
+        <a href="/admin/societies" class="nav-btn nav-btn-outline">🏘️ Societies</a>
+        <a href="/admin/users" class="nav-btn nav-btn-outline">👥 Users</a>
+        <span>🛡️ <span th:text="${user.name}"></span></span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="nav-btn nav-btn-danger">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div style="padding:30px;">
+
+    <div th:if="${param.resolved}" class="alert-modern alert-success-modern">
+        ✅ Complaint resolved successfully!
+    </div>
+
+    <h1 class="page-title">Admin Dashboard</h1>
+    <p class="page-subtitle">Overview of all societies</p>
+
+    <!-- STATS -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${totalSocieties}">0</div>
+                <div>Total Societies</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${totalUsers}">0</div>
+                <div>Users</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${totalComplaints}">0</div>
+                <div>Complaints</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${totalResolved}">0</div>
+                <div>Resolved</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOCIETY -->
+    <div class="row g-4">
+        <div class="col-md-6" th:each="society : ${societies}">
+            <div class="card-modern">
+
+                <div class="society-card-header">
+                    <h5 th:text="${society.name}"></h5>
+                    <small th:text="${society.city}"></small>
+                </div>
+
+                <div style="padding:20px;">
+
+                    <div class="row mb-3">
+                        <div class="col-4 mini-stat">
+                            <div th:text="${societyStats[society.id]?.get('pending')}">0</div>
+                            <small>Pending</small>
+                        </div>
+                        <div class="col-4 mini-stat">
+                            <div th:text="${societyStats[society.id]?.get('inProgress')}">0</div>
+                            <small>Progress</small>
+                        </div>
+                        <div class="col-4 mini-stat">
+                            <div th:text="${societyStats[society.id]?.get('resolved')}">0</div>
+                            <small>Resolved</small>
+                        </div>
+                    </div>
+
+                    <div th:each="c : ${society.complaints}" class="complaint-item">
+                        <div style="display:flex; justify-content:space-between;">
+                            <div>
+                                <div class="complaint-title" th:text="${c.title}"></div>
+                                <div class="complaint-meta" th:text="${c.category}"></div>
+                            </div>
+                            <span th:class="${'badge-modern ' +
+                                (c.status.name() == 'PENDING' ? 'badge-pending' :
+                                 c.status.name() == 'RESOLVED' ? 'badge-resolved' :
+                                 c.status.name() == 'IN_PROGRESS' ? 'badge-inprogress' : 'badge-rejected')}"
+                                  th:text="${c.status}">
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- CHATBOT -->
+<button class="chatbot-btn" onclick="toggleChat()">💬</button>
+
+<div class="chatbot-window" id="chatWindow">
+    <div class="chatbot-header">🤖 Admin Assistant</div>
+    <div class="chatbot-messages" id="chatMessages"></div>
+    <div class="chatbot-input">
+        <input type="text" id="chatInput" class="form-control">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+    }
+</script>
+
+</body>
+</html>
